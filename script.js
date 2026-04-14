@@ -345,9 +345,25 @@ function showSafeScreen() {
 }
 
 secretExit.addEventListener("click", showSafeScreen);
+
+let tapCount = 0;
+let tapTimer = null;
+
 document.addEventListener("keydown", (e) => {
   if (e.key === "n" || e.key === "N") {
     showSafeScreen();
+  }
+});
+
+document.addEventListener("click", () => {
+  if (revealed) return;
+  tapCount += 1;
+  clearTimeout(tapTimer);
+  if (tapCount >= 3) {
+    tapCount = 0;
+    showSafeScreen();
+  } else {
+    tapTimer = setTimeout(() => { tapCount = 0; }, 600);
   }
 });
 

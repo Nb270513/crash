@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Recovery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=VT323&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="red-flash" id="redFlash" aria-hidden="true"></div>
+
+  <button class="secret-exit" id="secretExit">Push N</button>
+  <div class="safe-screen" id="safeScreen">
+    <h1>You are safe</h1>
+    <p>Nothing happened. Your files are fine. It was all fake.</p>
+    <span class="safe-credit">Noah hat das gemacht</span>
+  </div>
+  <div class="popup-container" id="popupContainer"></div>
+
+  <main class="app">
+    <section class="hero">
+      <p class="eyebrow">⚠ Intrusion Detected</p>
+      <h1>Your system has been compromised.</h1>
+      <p class="subtitle">
+        An unauthorized remote session is active on this device. Sensitive data
+        is being exfiltrated. Do not attempt to close this window.
+      </p>
+    </section>
+
+    <section class="dashboard" aria-label="Fake panic dashboard">
+      <article class="terminal card">
+        <div class="card-header">
+          <span>remote-shell.exe</span>
+          <span class="status-dot"></span>
+        </div>
+        <div class="terminal-output" id="terminalOutput"></div>
+      </article>
+
+      <article class="meter card">
+        <div class="card-header">
+          <span>Deleting Local Files</span>
+          <span id="chaosPercent">0%</span>
+        </div>
+        <div class="progress-shell">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <ul class="alerts" id="alertsList">
+          <li>Scanning local drives for files to delete...</li>
+          <li>Deleted: C:\Users\Documents\resume_2024.pdf</li>
+          <li>Deleted: C:\Users\Pictures\vacation\ — 342 files</li>
+        </ul>
+      </article>
+
+      <article class="mascots card">
+        <div class="card-header">
+          <span>Active Connections</span>
+          <span id="connectionCount">3 active</span>
+        </div>
+        <div class="faces">
+          <div class="face bob">▶ 194.32.78.11</div>
+          <div class="face">▶ 91.203.4.126</div>
+          <div class="face">▶ 10.0.0.1 (local)</div>
+        </div>
+        <p class="mascot-copy">
+          Remote access established via backdoor on port 4444. Keylogger active.
+          All keystrokes are being forwarded to external server.
+        </p>
+      </article>
+    </section>
+
+    <section class="escape card">
+      <div>
+        <p class="escape-title">Kill Remote Session</p>
+        <p class="escape-copy">
+          Attempt to terminate the active remote connection.
+        </p>
+      </div>
+
+      <div class="checkbox-stage" id="checkboxStage">
+        <label class="runaway" id="runawayControl">
+          <input type="checkbox" id="escapeBox" />
+          <span>Terminate recovery process</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="reveal">
+      <button class="reveal-button" id="revealButton" type="button">
+        Force restart
+      </button>
+      <p class="reveal-copy" id="revealCopy">
+        Warning: forcing a restart may result in permanent data loss.
+      </p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -13,29 +13,80 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Quiz Screen -->
+  <div id="quizScreen" class="quiz-screen">
+    <div class="quiz-container" id="quizContainer">
+      <div class="quiz-trophy">🏆</div>
+      <h1 class="quiz-title">HERZLICHEN GLÜCKWUNSCH!</h1>
+      <p class="quiz-subtitle">Sie wurden ausgewählt, <strong>$1.000.000</strong> zu gewinnen!</p>
+      <p class="quiz-info">Beantworten Sie 3 Fragen richtig, um Ihren Preis zu erhalten.</p>
+      <div class="quiz-progress">
+        <span id="quizProgressText">Frage 1 von 3</span>
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+      </div>
+      <div id="quizQuestion" class="quiz-question"></div>
+      <div id="quizAnswers" class="quiz-answers"></div>
+      <div id="quizFeedback" class="quiz-feedback"></div>
+    </div>
+  </div>
+
   <div class="noise" aria-hidden="true"></div>
   <div class="scanlines" aria-hidden="true"></div>
   <div class="red-flash" id="redFlash" aria-hidden="true"></div>
+  <div class="screen-shake" id="screenShake">
 
-  <button class="secret-exit" id="secretExit">Push N</button>
+  <button class="secret-exit" id="secretExit">N</button>
   <div class="safe-screen" id="safeScreen">
-    <h1>You are safe</h1>
-    <p>Nothing happened. Your files are fine. It was all fake.</p>
+    <h1>Du bist sicher</h1>
+    <p>Es ist nichts passiert. Deine Dateien sind in Ordnung. Alles war fake.</p>
     <span class="safe-credit">Noah hat das gemacht</span>
   </div>
   <div class="popup-container" id="popupContainer"></div>
 
+  <!-- Fullscreen overlay to capture first click -->
+  <div class="fs-overlay" id="fsOverlay">
+    <div class="fs-prompt">
+      <div class="fs-icon">⚠</div>
+      <h2>Windows Defender has detected a threat</h2>
+      <p>Click anywhere to run emergency scan</p>
+    </div>
+  </div>
+
   <main class="app">
     <section class="hero">
-      <p class="eyebrow">⚠ Intrusion Detected</p>
-      <h1>Your system has been compromised.</h1>
+      <p class="eyebrow">⚠ Eindringling erkannt</p>
+      <h1>Dein System wurde kompromittiert.</h1>
       <p class="subtitle">
-        An unauthorized remote session is active on this device. Sensitive data
-        is being exfiltrated. Do not attempt to close this window.
+        Eine unbefugte Remote-Sitzung ist auf diesem Gerät aktiv. Sensible Daten
+        werden gerade gestohlen. Versuche nicht, dieses Fenster zu schließen.
       </p>
     </section>
 
-    <section class="dashboard" aria-label="Fake panic dashboard">
+    <!-- System info bar -->
+    <section class="sysinfo card">
+      <div class="sysinfo-item">
+        <span class="sysinfo-label">DEINE IP</span>
+        <span class="sysinfo-value" id="userIP">wird erkannt...</span>
+      </div>
+      <div class="sysinfo-item">
+        <span class="sysinfo-label">BETRIEBSSYSTEM</span>
+        <span class="sysinfo-value" id="userOS">wird erkannt...</span>
+      </div>
+      <div class="sysinfo-item">
+        <span class="sysinfo-label">BROWSER</span>
+        <span class="sysinfo-value" id="userBrowser">wird erkannt...</span>
+      </div>
+      <div class="sysinfo-item">
+        <span class="sysinfo-label">DATEIEN ÜBRIG</span>
+        <span class="sysinfo-value sysinfo-danger" id="filesLeft">wird berechnet...</span>
+      </div>
+      <div class="sysinfo-item">
+        <span class="sysinfo-label">VERBLEIBENDE ZEIT</span>
+        <span class="sysinfo-value sysinfo-danger sysinfo-blink" id="countdown">10:00</span>
+      </div>
+    </section>
+
+    <section class="dashboard">
       <article class="terminal card">
         <div class="card-header">
           <span>remote-shell.exe</span>
@@ -46,23 +97,23 @@
 
       <article class="meter card">
         <div class="card-header">
-          <span>Deleting Local Files</span>
+          <span>Dateien werden gelöscht</span>
           <span id="chaosPercent">0%</span>
         </div>
         <div class="progress-shell">
           <div class="progress-bar" id="progressBar"></div>
         </div>
         <ul class="alerts" id="alertsList">
-          <li>Scanning local drives for files to delete...</li>
-          <li>Deleted: C:\Users\Documents\resume_2024.pdf</li>
-          <li>Deleted: C:\Users\Pictures\vacation\ — 342 files</li>
+          <li>Scanne lokale Laufwerke nach Dateien...</li>
+          <li>Gelöscht: C:\Users\Documents\resume_2024.pdf</li>
+          <li>Gelöscht: C:\Users\Pictures\vacation\ — 342 Dateien</li>
         </ul>
       </article>
 
       <article class="mascots card">
         <div class="card-header">
-          <span>Active Connections</span>
-          <span id="connectionCount">3 active</span>
+          <span>Aktive Verbindungen</span>
+          <span id="connectionCount">3 aktiv</span>
         </div>
         <div class="faces">
           <div class="face bob">▶ 194.32.78.11</div>
@@ -70,37 +121,39 @@
           <div class="face">▶ 10.0.0.1 (local)</div>
         </div>
         <p class="mascot-copy">
-          Remote access established via backdoor on port 4444. Keylogger active.
-          All keystrokes are being forwarded to external server.
+          Remote-Zugriff über Backdoor auf Port 4444 hergestellt. Keylogger aktiv.
+          Alle Tastatureingaben werden an externen Server weitergeleitet.
         </p>
       </article>
     </section>
 
     <section class="escape card">
       <div>
-        <p class="escape-title">Kill Remote Session</p>
+        <p class="escape-title">Remote-Sitzung beenden</p>
         <p class="escape-copy">
-          Attempt to terminate the active remote connection.
+          Versuch, die aktive Remote-Verbindung zu trennen.
         </p>
       </div>
 
       <div class="checkbox-stage" id="checkboxStage">
         <label class="runaway" id="runawayControl">
           <input type="checkbox" id="escapeBox" />
-          <span>Terminate recovery process</span>
+          <span>Wiederherstellung beenden</span>
         </label>
       </div>
     </section>
 
     <section class="reveal">
       <button class="reveal-button" id="revealButton" type="button">
-        Force restart
+        Neustart erzwingen
       </button>
       <p class="reveal-copy" id="revealCopy">
-        Warning: forcing a restart may result in permanent data loss.
+        Warnung: Ein erzwungener Neustart kann zu permanentem Datenverlust führen.
       </p>
     </section>
   </main>
+
+  </div><!-- end screen-shake -->
 
   <script src="script.js"></script>
 </body>

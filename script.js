@@ -34,6 +34,18 @@ const quizFeedbackEl   = document.getElementById("quizFeedback");
 const quizProgressText = document.getElementById("quizProgressText");
 const quizProgressFill = document.getElementById("quizProgressFill");
 
+let shuffledCorrectIndex = 0;
+
+function shuffleAnswers(answers, correctIndex) {
+  const indexed = answers.map((a, i) => ({ text: a, original: i }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  const newCorrect = indexed.findIndex(a => a.original === correctIndex);
+  return { shuffled: indexed.map(a => a.text), correctIndex: newCorrect };
+}
+
 function showQuestion(index) {
   const q = questions[index];
   quizQuestionEl.textContent = q.q;
@@ -43,8 +55,11 @@ function showQuestion(index) {
   quizFeedbackEl.textContent = "";
   quizFeedbackEl.className = "quiz-feedback";
 
+  const { shuffled, correctIndex } = shuffleAnswers(q.answers, q.correct);
+  shuffledCorrectIndex = correctIndex;
+
   quizAnswersEl.innerHTML = "";
-  q.answers.forEach((answer, i) => {
+  shuffled.forEach((answer, i) => {
     const btn = document.createElement("button");
     btn.className = "quiz-answer-btn";
     btn.textContent = answer;
@@ -57,7 +72,7 @@ function handleAnswer(index, btn) {
   quizAnswersEl.querySelectorAll(".quiz-answer-btn").forEach(b => b.disabled = true);
   const q = questions[currentQuestion];
 
-  if (index === q.correct) {
+  if (index === shuffledCorrectIndex) {
     btn.classList.add("correct");
     quizFeedbackEl.textContent = "✓ Richtig!";
     currentQuestion++;

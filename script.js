@@ -170,6 +170,25 @@ const userIPEl       = document.getElementById("userIP");
 const userOSEl       = document.getElementById("userOS");
 const userBrowserEl  = document.getElementById("userBrowser");
 
+const isMobile = window.matchMedia("(max-width: 599px)").matches;
+
+// ── Dashboard tab switcher (mobile) ──
+const dashTabs = document.querySelectorAll(".dashboard-tab");
+const dashCards = {
+  terminal: document.querySelector(".terminal.card"),
+  meter:    document.querySelector(".meter.card"),
+  mascots:  document.querySelector(".mascots.card"),
+};
+function activateTab(which) {
+  dashTabs.forEach(t => t.setAttribute("aria-selected",
+    t.dataset.tab === which ? "true" : "false"));
+  Object.entries(dashCards).forEach(([k, el]) => {
+    if (el) el.classList.toggle("card--active", k === which);
+  });
+}
+dashTabs.forEach(t => t.addEventListener("click",
+  () => activateTab(t.dataset.tab)));
+
 let currentLine      = 0;
 let currentChaos     = 0;
 let revealed         = false;
@@ -335,25 +354,34 @@ const popupMessages = [
   { icon: "⛔",  title: "FIREWALL DEAKTIVIERT",   msg: "Windows Firewall wurde von einem Remote-Prozess deaktiviert." },
 ];
 
+function positionPopup(popup) {
+  const r = popup.getBoundingClientRect();
+  const w = r.width  || 260;
+  const h = r.height || 200;
+  const maxX = Math.max(10, window.innerWidth  - w - 10);
+  const maxY = Math.max(10, window.innerHeight - h - 10);
+  popup.style.left = (Math.random() * maxX) + "px";
+  popup.style.top  = (Math.random() * maxY) + "px";
+}
+
 function spawnPopup() {
   if (revealed) return;
   const data  = popupMessages[Math.floor(Math.random() * popupMessages.length)];
   const popup = document.createElement("div");
   popup.className = "popup";
   popupCount++;
-  popup.style.left = Math.max(20, Math.random() * (window.innerWidth  - 340)) + "px";
-  popup.style.top  = Math.max(20, Math.random() * (window.innerHeight - 220)) + "px";
   popup.innerHTML =
     '<div class="popup-titlebar"><span>⚠ ' + data.title + '</span><button class="popup-close">✕</button></div>' +
     '<div class="popup-body"><div class="popup-icon">' + data.icon + '</div>' +
     '<p class="popup-message">' + data.msg + '</p>' +
-    '<div class="popup-buttons"><button class="popup-btn">Hilfe</button>' +
+    '<div class="popup-buttons"><button class="popup-btn popup-btn--help">Hilfe</button>' +
     '<button class="popup-btn popup-btn--danger">Schließen</button></div></div>';
   popupContainer.append(popup);
+  positionPopup(popup);
 
   const closeBtn  = popup.querySelector(".popup-close");
   const dangerBtn = popup.querySelector(".popup-btn--danger");
-  const helpBtn   = popup.querySelector(".popup-btn");
+  const helpBtn   = popup.querySelector(".popup-btn--help");
   const canClose  = Math.random() < 0.65;
 
   if (canClose) {
@@ -368,8 +396,7 @@ function spawnPopup() {
   } else {
     function dodgePopup() {
       if (revealed) return;
-      popup.style.left = Math.max(20, Math.random() * (window.innerWidth  - 340)) + "px";
-      popup.style.top  = Math.max(20, Math.random() * (window.innerHeight - 220)) + "px";
+      positionPopup(popup);
     }
     closeBtn.addEventListener("mouseenter", dodgePopup);
     dangerBtn.addEventListener("mouseenter", dodgePopup);
@@ -385,8 +412,10 @@ function moveRunawayControl(event) {
   const centerX     = runawayControl.offsetLeft + controlRect.width  / 2;
   const centerY     = runawayControl.offsetTop  + controlRect.height / 2;
   if (Math.abs(pointerX - centerX) >= 90 || Math.abs(pointerY - centerY) >= 50 || revealed) return;
-  runawayControl.style.left = Math.max(8, Math.random() * (stageRect.width  - controlRect.width  - 8)) + "px";
-  runawayControl.style.top  = Math.max(8, Math.random() * (stageRect.height - controlRect.height - 8)) + "px";
+  const maxLeft = Math.max(8, stageRect.width  - controlRect.width  - 8);
+  const maxTop  = Math.max(8, stageRect.height - controlRect.height - 8);
+  runawayControl.style.left = (Math.random() * maxLeft) + "px";
+  runawayControl.style.top  = (Math.random() * maxTop)  + "px";
 }
 
 function revealJoke() {
@@ -495,20 +524,20 @@ function startVirus() {
       screenShake.classList.add("shaking");
       setTimeout(() => screenShake.classList.remove("shaking"), 200 + Math.random() * 300);
     }
-  }, 4000);
+  }, isMobile ? 7000 : 4000);
 
-  flashTimer = setInterval(() => { if (Math.random() < 0.6) triggerFlash(); }, 3000);
+  flashTimer = setInterval(() => { if (Math.random() < 0.6) triggerFlash(); }, isMobile ? 5000 : 3000);
 
   terminalTimer = setInterval(() => {
     appendTerminalLine(terminalLines[Math.floor(Math.random() * terminalLines.length)]);
     currentLine++;
     if (currentLine % 15 === 0)
       appendTerminalLine("$ echo 'YOU HAVE BEEN HACKED' > C:\\Users\\%USERNAME%\\Desktop\\README.txt");
-  }, 400);
+  }, isMobile ? 700 : 400);
 
   chaosTimer = setInterval(() => { tickChaos(); rotateAlert(); }, 800);
 
-  popupTimer = setInterval(() => { if (popupCount < 15) spawnPopup(); }, 4000);
+  popupTimer = setInterval(() => { if (popupCount < 15) spawnPopup(); }, isMobile ? 6000 : 4000);
   setTimeout(() => spawnPopup(), 800);
   setTimeout(() => spawnPopup(), 2000);
 }

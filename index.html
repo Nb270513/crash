@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>computer_virus.ch</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,7 +35,7 @@
   <div class="red-flash" id="redFlash" aria-hidden="true"></div>
   <div class="screen-shake" id="screenShake">
 
-  <button class="secret-exit" id="secretExit">N</button>
+  <button class="secret-exit" id="secretExit" aria-label="Exit">N</button>
   <div class="safe-screen" id="safeScreen">
     <h1>Du bist sicher</h1>
     <p>Es ist nichts passiert. Deine Dateien sind in Ordnung. Alles war fake.</p>
@@ -86,8 +86,17 @@
       </div>
     </section>
 
+    <div class="dashboard-tabs" role="tablist" aria-label="Dashboard-Ansicht">
+      <button type="button" class="dashboard-tab" role="tab" id="tabTerminal"
+              data-tab="terminal" aria-selected="true" aria-controls="cardTerminal">Terminal</button>
+      <button type="button" class="dashboard-tab" role="tab" id="tabProgress"
+              data-tab="meter" aria-selected="false" aria-controls="cardMeter">Fortschritt</button>
+      <button type="button" class="dashboard-tab" role="tab" id="tabConnections"
+              data-tab="mascots" aria-selected="false" aria-controls="cardMascots">Verbindungen</button>
+    </div>
+
     <section class="dashboard">
-      <article class="terminal card">
+      <article class="terminal card card--active" id="cardTerminal" role="tabpanel" aria-labelledby="tabTerminal">
         <div class="card-header">
           <span>remote-shell.exe</span>
           <span class="status-dot"></span>
@@ -95,7 +104,7 @@
         <div class="terminal-output" id="terminalOutput"></div>
       </article>
 
-      <article class="meter card">
+      <article class="meter card" id="cardMeter" role="tabpanel" aria-labelledby="tabProgress">
         <div class="card-header">
           <span>Dateien werden gelöscht</span>
           <span id="chaosPercent">0%</span>
@@ -110,7 +119,7 @@
         </ul>
       </article>
 
-      <article class="mascots card">
+      <article class="mascots card" id="cardMascots" role="tabpanel" aria-labelledby="tabConnections">
         <div class="card-header">
           <span>Aktive Verbindungen</span>
           <span id="connectionCount">3 aktiv</span>

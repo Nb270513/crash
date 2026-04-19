@@ -560,6 +560,10 @@ function startVirus() {
     if (currentLine % 15 === 0)
       appendTerminalLine("$ echo 'YOU HAVE BEEN HACKED' > C:\\Users\\%USERNAME%\\Desktop\\README.txt");
   }, isMobile ? 700 : 400);
+
+  // Desktop: everything loads at once like the original. Mobile stays
+  // in Phase 1 until the user taps the Schließen button.
+  if (!isMobile) startChaosPhase();
 }
 
 // Phase 2: fires when user taps the "Schließen" close button.

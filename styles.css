@@ -247,6 +247,36 @@ body::before {
   line-height: 1.55;
 }
 
+.virus-close {
+  display: block;
+  width: 100%;
+  margin: 16px auto 0;
+  min-height: 48px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #ff5b73, #c13851);
+  color: #fff;
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer !important;
+  box-shadow: 0 8px 24px rgba(255, 91, 115, 0.35);
+  transition: transform 120ms ease;
+}
+
+.virus-close:hover {
+  transform: translateY(-1px);
+}
+
+.virus-close:active {
+  transform: translateY(1px);
+}
+
+.reveal-mode .virus-close {
+  display: none;
+}
+
 /* Dashboard tabs (mobile) */
 .dashboard-tabs {
   display: flex;
@@ -945,6 +975,12 @@ body::before {
 
   .reveal-button {
     width: auto;
+  }
+
+  .virus-close {
+    width: auto;
+    margin-top: 18px;
+    padding: 14px 28px;
   }
 
   .popup {

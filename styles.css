@@ -22,7 +22,7 @@ body {
 }
 
 body {
-  overflow: hidden;
+  overflow-x: hidden;
   font-family: "Space Grotesk", sans-serif;
   color: var(--text);
   background:

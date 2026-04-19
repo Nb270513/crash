@@ -1012,11 +1012,6 @@ body::before {
    Restores original full-effect styling.
    ───────────────────────────────────── */
 @media (min-width: 1024px) {
-  body {
-    overflow: hidden;
-    overflow-y: hidden;
-  }
-
   body::before {
     inset: -20%;
     animation: drift 18s linear infinite;

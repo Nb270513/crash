@@ -3,23 +3,13 @@
 // ══════════════════════════════════════
 const questions = [
   {
-    q: "Was ist die Hauptstadt von Australien?",
-    answers: ["Sydney", "Melbourne", "Canberra", "Brisbane"],
-    correct: 2
+    q: "Was ist die Hauptstadt der Schweiz?",
+    answers: ["Bern", "Zürich"],
+    correct: 0
   },
   {
-    q: "Welches Land hat die meisten Zeitzonen der Welt?",
-    answers: ["Russland", "USA", "Frankreich", "China"],
-    correct: 2
-  },
-  {
-    q: "Welches ist das schwerste natürliche Element?",
-    answers: ["Gold", "Blei", "Osmium", "Plutonium"],
-    correct: 2
-  },
-  {
-    q: "🔴 BOSS-FRAGE: Wie viele Sekunden hat ein Schaltjahr?",
-    answers: ["31.536.000", "31.622.400", "31.557.600", "31.104.000"],
+    q: "Welche davon ist KEINE Schweizer Landessprache?",
+    answers: ["Deutsch", "Indisch"],
     correct: 1
   }
 ];
@@ -34,8 +24,6 @@ const quizFeedbackEl   = document.getElementById("quizFeedback");
 const quizProgressText = document.getElementById("quizProgressText");
 const quizProgressFill = document.getElementById("quizProgressFill");
 
-let shuffledCorrectIndex = 0;
-
 function shuffleAnswers(answers, correctIndex) {
   const indexed = answers.map((a, i) => ({ text: a, original: i }));
   for (let i = indexed.length - 1; i > 0; i--) {
@@ -49,14 +37,12 @@ function shuffleAnswers(answers, correctIndex) {
 function showQuestion(index) {
   const q = questions[index];
   quizQuestionEl.textContent = q.q;
-  const isBoss = index === questions.length - 1;
-  quizProgressText.textContent = isBoss ? "🔴 BOSS-FRAGE" : `Frage ${index + 1} von ${questions.length}`;
+  quizProgressText.textContent = `Frage ${index + 1} von ${questions.length}`;
   quizProgressFill.style.width = `${(index / questions.length) * 100}%`;
   quizFeedbackEl.textContent = "";
   quizFeedbackEl.className = "quiz-feedback";
 
-  const { shuffled, correctIndex } = shuffleAnswers(q.answers, q.correct);
-  shuffledCorrectIndex = correctIndex;
+  const { shuffled } = shuffleAnswers(q.answers, q.correct);
 
   quizAnswersEl.innerHTML = "";
   shuffled.forEach((answer, i) => {
@@ -68,74 +54,26 @@ function showQuestion(index) {
   });
 }
 
+// Rigged: whatever the user taps, swap its label with the other button
+// so the clicked position now shows the "wrong" answer text, then mark wrong.
 function handleAnswer(index, btn) {
-  quizAnswersEl.querySelectorAll(".quiz-answer-btn").forEach(b => b.disabled = true);
-  const q = questions[currentQuestion];
+  const buttons = quizAnswersEl.querySelectorAll(".quiz-answer-btn");
+  buttons.forEach(b => b.disabled = true);
+  const other = buttons[index === 0 ? 1 : 0];
+  const clicked = btn.textContent;
+  btn.textContent = other.textContent;
+  other.textContent = clicked;
 
-  if (index === shuffledCorrectIndex) {
-    btn.classList.add("correct");
-    quizFeedbackEl.textContent = "✓ Richtig!";
-    currentQuestion++;
+  btn.classList.add("wrong");
+  quizFeedbackEl.className = "quiz-feedback error";
+  quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
 
-    if (currentQuestion >= questions.length) {
-      setTimeout(showTransferScreen, 900);
-    } else {
-      setTimeout(() => showQuestion(currentQuestion), 1000);
-    }
+  currentQuestion++;
+  if (currentQuestion >= questions.length) {
+    setTimeout(launchVirus, 2000);
   } else {
-    btn.classList.add("wrong");
-    quizFeedbackEl.className = "quiz-feedback error";
-    quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT! Zugriff wird gestartet...";
-    setTimeout(launchVirus, 1600);
+    setTimeout(() => showQuestion(currentQuestion), 2500);
   }
-}
-
-function showTransferScreen() {
-  quizContainer.innerHTML = `
-    <div class="quiz-transfer">
-      <div class="quiz-transfer-icon">💸</div>
-      <div class="quiz-transfer-title">GLÜCKWUNSCH!</div>
-      <div class="quiz-transfer-amount">$1.000.000</div>
-      <p style="color:#9eaecf;margin:0 0 16px">Wird auf Ihr Konto übertragen...</p>
-      <div class="quiz-transfer-bar">
-        <div class="quiz-transfer-fill" id="transferFill" style="transition:none"></div>
-      </div>
-      <p class="quiz-transfer-status" id="transferStatus">Verbinde mit Bankserver... 0%</p>
-    </div>
-  `;
-
-  const statusEl = document.getElementById("transferStatus");
-  const fillEl   = document.getElementById("transferFill");
-
-  const messages = [
-    "Verbinde mit Bankserver...",
-    "Identität wird verifiziert...",
-    "Betrag wird vorbereitet...",
-    "Übertragung läuft...",
-    "Fast fertig..."
-  ];
-
-  let percent = 0;
-  const interval = setInterval(() => {
-    percent++;
-    fillEl.style.width = percent + "%";
-    const msg = messages[Math.floor((percent / 98) * (messages.length - 1))];
-    statusEl.textContent = msg + " " + percent + "%";
-
-    if (percent >= 98) {
-      clearInterval(interval);
-      setTimeout(() => {
-        quizContainer.innerHTML = `
-          <div style="text-align:center">
-            <div style="font-size:4rem;margin-bottom:16px">📡</div>
-            <div style="font-size:1.8rem;font-weight:700;color:#ff5b73;margin-bottom:10px">Kein Internet</div>
-            <p style="color:#9eaecf;font-size:0.95rem">Die Verbindung zum Server wurde unterbrochen.<br>Übertragung fehlgeschlagen.</p>
-          </div>
-        `;
-        setTimeout(launchVirus, 1800);
-      }, 600);
-    }
-  }, 40);
 }
 
 function launchVirus() {

@@ -160,6 +160,7 @@ let totalFiles       = 24847 + Math.floor(Math.random() * 8000);
 let filesDeleted     = 0;
 let chaosStarted     = false;
 let virusCloseClicks = 0;
+let neustartClicks   = 0;
 
 let terminalTimer, chaosTimer, popupTimer, flashTimer, countdownTimer, shakeTimer, titleTimer;
 
@@ -450,7 +451,14 @@ checkboxStage.addEventListener("mousemove", moveRunawayControl);
 checkboxStage.addEventListener("touchstart", revealJoke, { passive: true });
 escapeBox.addEventListener("click",      (e) => { if (!revealed) e.preventDefault(); });
 runawayControl.addEventListener("click", (e) => { if (!revealed) e.preventDefault(); });
-revealButton.addEventListener("click", revealJoke);
+revealButton.addEventListener("click", () => {
+  neustartClicks++;
+  if (neustartClicks >= 2) {
+    showSafeScreen();
+  } else {
+    revealJoke();
+  }
+});
 document.getElementById("secretExit").addEventListener("click", showSafeScreen);
 
 // Close button: first tap triggers chaos, taps 2+3 throw more popups,

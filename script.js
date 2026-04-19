@@ -111,7 +111,7 @@ function handleAnswer(index, btn) {
     if (!firstTapHandled) {
       firstTapHandled = true;
       swapInProgress  = true;
-      setTimeout(() => animateSwap(btn, other, 250, () => { swapInProgress = false; }), 150);
+      setTimeout(() => animateSwap(btn, other, 150, () => { swapInProgress = false; }), 60);
       return;
     }
     buttons.forEach(b => b.disabled = true);
@@ -125,7 +125,7 @@ function handleAnswer(index, btn) {
   // Desktop: instant swap + wrong flash on the same click.
   buttons.forEach(b => b.disabled = true);
   swapInProgress = true;
-  animateSwap(btn, other, 400, () => {
+  animateSwap(btn, other, 220, () => {
     swapInProgress = false;
     btn.classList.add("wrong");
     quizFeedbackEl.className = "quiz-feedback error";

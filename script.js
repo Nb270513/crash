@@ -19,6 +19,7 @@ const questions = [
 let currentQuestion = 0;
 let firstTapHandled = false;
 let swapInProgress  = false;
+let shuffledCorrectIndex = 0;
 
 const quizScreen       = document.getElementById("quizScreen");
 const quizContainer    = document.getElementById("quizContainer");
@@ -48,7 +49,8 @@ function showQuestion(index) {
   firstTapHandled = false;
   swapInProgress  = false;
 
-  const { shuffled } = shuffleAnswers(q.answers, q.correct);
+  const { shuffled, correctIndex } = shuffleAnswers(q.answers, q.correct);
+  shuffledCorrectIndex = correctIndex;
 
   quizAnswersEl.innerHTML = "";
   shuffled.forEach((answer, i) => {
@@ -87,7 +89,7 @@ function animateSwap(btn, other, duration, onDone) {
   }, duration + 20);
 }
 
-function advanceAfterWrong() {
+function advanceQuestion() {
   currentQuestion++;
   if (currentQuestion >= questions.length) {
     setTimeout(launchVirus, 900);
@@ -96,12 +98,28 @@ function advanceAfterWrong() {
   }
 }
 
+// After the swap, the tapped button shows the label that used to be on
+// the OTHER button. So if the user originally tapped the correct answer,
+// they now see the wrong text — flag them wrong. If they originally tapped
+// the wrong answer, after the swap they're showing the correct text — flag
+// them right. The prank flips whichever choice the user made.
+function markAfterSwap(btn, tapIndex) {
+  const tappedOriginallyCorrect = (tapIndex === shuffledCorrectIndex);
+  if (tappedOriginallyCorrect) {
+    btn.classList.add("wrong");
+    quizFeedbackEl.className = "quiz-feedback error";
+    quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
+  } else {
+    btn.classList.add("correct");
+    quizFeedbackEl.className = "quiz-feedback";
+    quizFeedbackEl.textContent = "✓ RICHTIG!";
+  }
+}
+
 // Two pranks, one per form factor:
 //   - Mobile: sleight-of-hand between taps. First tap looks dead;
-//     the buttons swap silently; the second tap lands on the wrong answer.
-//   - Desktop: instant swap animation on click, then the clicked button
-//     flashes wrong. Readable with a mouse where the user sees both
-//     buttons the whole time.
+//     the buttons swap silently; the second tap is what gets marked.
+//   - Desktop: instant swap on click, marking applies to the post-swap label.
 function handleAnswer(index, btn) {
   const buttons = quizAnswersEl.querySelectorAll(".quiz-answer-btn");
   if (swapInProgress) return;
@@ -115,22 +133,18 @@ function handleAnswer(index, btn) {
       return;
     }
     buttons.forEach(b => b.disabled = true);
-    btn.classList.add("wrong");
-    quizFeedbackEl.className = "quiz-feedback error";
-    quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
-    advanceAfterWrong();
+    markAfterSwap(btn, index);
+    advanceQuestion();
     return;
   }
 
-  // Desktop: instant swap + wrong flash on the same click.
+  // Desktop: instant label swap, then mark based on post-swap state.
   buttons.forEach(b => b.disabled = true);
   const clickedText = btn.textContent;
   btn.textContent = other.textContent;
   other.textContent = clickedText;
-  btn.classList.add("wrong");
-  quizFeedbackEl.className = "quiz-feedback error";
-  quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
-  advanceAfterWrong();
+  markAfterSwap(btn, index);
+  advanceQuestion();
 }
 
 function launchVirus() {

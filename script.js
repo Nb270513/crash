@@ -125,7 +125,7 @@ function handleAnswer(index, btn) {
   // Desktop: instant swap + wrong flash on the same click.
   buttons.forEach(b => b.disabled = true);
   swapInProgress = true;
-  animateSwap(btn, other, 220, () => {
+  animateSwap(btn, other, 110, () => {
     swapInProgress = false;
     btn.classList.add("wrong");
     quizFeedbackEl.className = "quiz-feedback error";

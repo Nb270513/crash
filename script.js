@@ -90,9 +90,9 @@ function animateSwap(btn, other, duration, onDone) {
 function advanceAfterWrong() {
   currentQuestion++;
   if (currentQuestion >= questions.length) {
-    setTimeout(launchVirus, 2000);
+    setTimeout(launchVirus, 900);
   } else {
-    setTimeout(() => showQuestion(currentQuestion), 2500);
+    setTimeout(() => showQuestion(currentQuestion), 1100);
   }
 }
 

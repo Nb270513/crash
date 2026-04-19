@@ -15,6 +15,8 @@ const questions = [
 ];
 
 let currentQuestion = 0;
+let firstTapHandled = false;
+let swapInProgress  = false;
 
 const quizScreen       = document.getElementById("quizScreen");
 const quizContainer    = document.getElementById("quizContainer");
@@ -41,6 +43,8 @@ function showQuestion(index) {
   quizProgressFill.style.width = `${(index / questions.length) * 100}%`;
   quizFeedbackEl.textContent = "";
   quizFeedbackEl.className = "quiz-feedback";
+  firstTapHandled = false;
+  swapInProgress  = false;
 
   const { shuffled } = shuffleAnswers(q.answers, q.correct);
 
@@ -54,46 +58,58 @@ function showQuestion(index) {
   });
 }
 
-// Rigged: on tap, animate the two buttons swapping positions,
-// then swap their labels and flash the clicked one as wrong.
+// Sleight-of-hand: first tap does nothing, then the buttons silently
+// swap labels behind the user's back. When the user taps again
+// (thinking their first tap didn't register), they hit the wrong answer.
 function handleAnswer(index, btn) {
   const buttons = quizAnswersEl.querySelectorAll(".quiz-answer-btn");
+  if (swapInProgress) return;
+
+  if (!firstTapHandled) {
+    firstTapHandled = true;
+    swapInProgress  = true;
+    const other = buttons[index === 0 ? 1 : 0];
+
+    setTimeout(() => {
+      const rA = btn.getBoundingClientRect();
+      const rB = other.getBoundingClientRect();
+      const dx = rB.left - rA.left;
+      const dy = rB.top - rA.top;
+
+      btn.style.position = other.style.position = "relative";
+      btn.style.zIndex = "2";
+      other.style.zIndex = "1";
+      btn.style.transition = other.style.transition = "transform 250ms ease";
+      btn.style.transform = `translate(${dx}px, ${dy}px)`;
+      other.style.transform = `translate(${-dx}px, ${-dy}px)`;
+
+      setTimeout(() => {
+        const clickedText = btn.textContent;
+        btn.textContent = other.textContent;
+        other.textContent = clickedText;
+        btn.style.transition = other.style.transition = "none";
+        btn.style.transform = other.style.transform = "";
+        void btn.offsetHeight;
+        btn.style.transition = other.style.transition = "";
+        btn.style.position = other.style.position = "";
+        btn.style.zIndex = other.style.zIndex = "";
+        swapInProgress = false;
+      }, 270);
+    }, 150);
+    return;
+  }
+
+  // Second tap: mark wrong and advance.
   buttons.forEach(b => b.disabled = true);
-  const other = buttons[index === 0 ? 1 : 0];
-
-  const rA = btn.getBoundingClientRect();
-  const rB = other.getBoundingClientRect();
-  const dx = rB.left - rA.left;
-  const dy = rB.top - rA.top;
-
-  btn.style.position = other.style.position = "relative";
-  btn.style.zIndex = "2";
-  other.style.zIndex = "1";
-  btn.style.transition = other.style.transition = "transform 400ms ease";
-  btn.style.transform = `translate(${dx}px, ${dy}px)`;
-  other.style.transform = `translate(${-dx}px, ${-dy}px)`;
-
-  setTimeout(() => {
-    const clickedText = btn.textContent;
-    btn.textContent = other.textContent;
-    other.textContent = clickedText;
-    btn.style.transition = other.style.transition = "none";
-    btn.style.transform = other.style.transform = "";
-    void btn.offsetHeight;
-    btn.style.transition = other.style.transition = "";
-    btn.style.position = other.style.position = "";
-    btn.style.zIndex = other.style.zIndex = "";
-
-    btn.classList.add("wrong");
-    quizFeedbackEl.className = "quiz-feedback error";
-    quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
-  }, 420);
+  btn.classList.add("wrong");
+  quizFeedbackEl.className = "quiz-feedback error";
+  quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
 
   currentQuestion++;
   if (currentQuestion >= questions.length) {
-    setTimeout(launchVirus, 2500);
+    setTimeout(launchVirus, 2000);
   } else {
-    setTimeout(() => showQuestion(currentQuestion), 3000);
+    setTimeout(() => showQuestion(currentQuestion), 2500);
   }
 }
 

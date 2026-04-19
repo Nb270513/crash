@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>computer_virus.ch</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,10 +17,11 @@
   <div id="quizScreen" class="quiz-screen">
     <div class="quiz-container" id="quizContainer">
       <div class="quiz-trophy">🏆</div>
-      <h1 class="quiz-title">GLÜCKWUNSCH!</h1>
-      <p class="quiz-subtitle">Sie können <strong>$1.000.000</strong> gewinnen!</p>
+      <h1 class="quiz-title">HERZLICHEN GLÜCKWUNSCH!</h1>
+      <p class="quiz-subtitle">Sie wurden ausgewählt, <strong>$1.000.000</strong> zu gewinnen!</p>
+      <p class="quiz-info">Beantworten Sie 3 Fragen richtig, um Ihren Preis zu erhalten.</p>
       <div class="quiz-progress">
-        <span id="quizProgressText">Frage 1 von 2</span>
+        <span id="quizProgressText">Frage 1 von 3</span>
         <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
       </div>
       <div id="quizQuestion" class="quiz-question"></div>
@@ -32,8 +33,9 @@
   <div class="noise" aria-hidden="true"></div>
   <div class="scanlines" aria-hidden="true"></div>
   <div class="red-flash" id="redFlash" aria-hidden="true"></div>
+  <div class="screen-shake" id="screenShake">
 
-  <button class="secret-exit" id="secretExit" aria-label="Exit">N</button>
+  <button class="secret-exit" id="secretExit">N</button>
   <div class="safe-screen" id="safeScreen">
     <h1>Du bist sicher</h1>
     <p>Es ist nichts passiert. Deine Dateien sind in Ordnung. Alles war fake.</p>
@@ -41,14 +43,12 @@
   </div>
   <div class="popup-container" id="popupContainer"></div>
 
-  <div class="screen-shake" id="screenShake">
-
   <!-- Fullscreen overlay to capture first click -->
   <div class="fs-overlay" id="fsOverlay">
     <div class="fs-prompt">
       <div class="fs-icon">⚠</div>
-      <h2>Bitdefender hat eine Bedrohung erkannt</h2>
-      <p>Notfall-Scan wird gestartet...</p>
+      <h2>Windows Defender has detected a threat</h2>
+      <p>Click anywhere to run emergency scan</p>
     </div>
   </div>
 
@@ -60,7 +60,6 @@
         Eine unbefugte Remote-Sitzung ist auf diesem Gerät aktiv. Sensible Daten
         werden gerade gestohlen. Versuche nicht, dieses Fenster zu schließen.
       </p>
-      <button type="button" class="virus-close" id="virusClose">✕ Dieses Fenster schließen</button>
     </section>
 
     <!-- System info bar -->
@@ -87,17 +86,8 @@
       </div>
     </section>
 
-    <div class="dashboard-tabs" role="tablist" aria-label="Dashboard-Ansicht">
-      <button type="button" class="dashboard-tab" role="tab" id="tabTerminal"
-              data-tab="terminal" aria-selected="true" aria-controls="cardTerminal">Terminal</button>
-      <button type="button" class="dashboard-tab" role="tab" id="tabProgress"
-              data-tab="meter" aria-selected="false" aria-controls="cardMeter">Fortschritt</button>
-      <button type="button" class="dashboard-tab" role="tab" id="tabConnections"
-              data-tab="mascots" aria-selected="false" aria-controls="cardMascots">Verbindungen</button>
-    </div>
-
     <section class="dashboard">
-      <article class="terminal card card--active" id="cardTerminal" role="tabpanel" aria-labelledby="tabTerminal">
+      <article class="terminal card">
         <div class="card-header">
           <span>remote-shell.exe</span>
           <span class="status-dot"></span>
@@ -105,7 +95,7 @@
         <div class="terminal-output" id="terminalOutput"></div>
       </article>
 
-      <article class="meter card" id="cardMeter" role="tabpanel" aria-labelledby="tabProgress">
+      <article class="meter card">
         <div class="card-header">
           <span>Dateien werden gelöscht</span>
           <span id="chaosPercent">0%</span>
@@ -120,7 +110,7 @@
         </ul>
       </article>
 
-      <article class="mascots card" id="cardMascots" role="tabpanel" aria-labelledby="tabConnections">
+      <article class="mascots card">
         <div class="card-header">
           <span>Aktive Verbindungen</span>
           <span id="connectionCount">3 aktiv</span>

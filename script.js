@@ -1,25 +1,30 @@
-const isMobile = window.matchMedia("(max-width: 599px)").matches;
-
 // ══════════════════════════════════════
 // QUIZ
 // ══════════════════════════════════════
 const questions = [
   {
-    q: "Was ist die Hauptstadt der Schweiz?",
-    answers: ["Bern", "Zürich"],
-    correct: 0
+    q: "Was ist die Hauptstadt von Australien?",
+    answers: ["Sydney", "Melbourne", "Canberra", "Brisbane"],
+    correct: 2
   },
   {
-    q: "Welche davon ist KEINE Schweizer Landessprache?",
-    answers: ["Deutsch", "Indisch"],
+    q: "Welches Land hat die meisten Zeitzonen der Welt?",
+    answers: ["Russland", "USA", "Frankreich", "China"],
+    correct: 2
+  },
+  {
+    q: "Welches ist das schwerste natürliche Element?",
+    answers: ["Gold", "Blei", "Osmium", "Plutonium"],
+    correct: 2
+  },
+  {
+    q: "🔴 BOSS-FRAGE: Wie viele Sekunden hat ein Schaltjahr?",
+    answers: ["31.536.000", "31.622.400", "31.557.600", "31.104.000"],
     correct: 1
   }
 ];
 
 let currentQuestion = 0;
-let firstTapHandled = false;
-let swapInProgress  = false;
-let shuffledCorrectIndex = 0;
 
 const quizScreen       = document.getElementById("quizScreen");
 const quizContainer    = document.getElementById("quizContainer");
@@ -28,6 +33,8 @@ const quizAnswersEl    = document.getElementById("quizAnswers");
 const quizFeedbackEl   = document.getElementById("quizFeedback");
 const quizProgressText = document.getElementById("quizProgressText");
 const quizProgressFill = document.getElementById("quizProgressFill");
+
+let shuffledCorrectIndex = 0;
 
 function shuffleAnswers(answers, correctIndex) {
   const indexed = answers.map((a, i) => ({ text: a, original: i }));
@@ -42,12 +49,11 @@ function shuffleAnswers(answers, correctIndex) {
 function showQuestion(index) {
   const q = questions[index];
   quizQuestionEl.textContent = q.q;
-  quizProgressText.textContent = `Frage ${index + 1} von ${questions.length}`;
+  const isBoss = index === questions.length - 1;
+  quizProgressText.textContent = isBoss ? "🔴 BOSS-FRAGE" : `Frage ${index + 1} von ${questions.length}`;
   quizProgressFill.style.width = `${(index / questions.length) * 100}%`;
   quizFeedbackEl.textContent = "";
   quizFeedbackEl.className = "quiz-feedback";
-  firstTapHandled = false;
-  swapInProgress  = false;
 
   const { shuffled, correctIndex } = shuffleAnswers(q.answers, q.correct);
   shuffledCorrectIndex = correctIndex;
@@ -62,97 +68,79 @@ function showQuestion(index) {
   });
 }
 
-function animateSwap(btn, other, duration, onDone) {
-  const rA = btn.getBoundingClientRect();
-  const rB = other.getBoundingClientRect();
-  const dx = rB.left - rA.left;
-  const dy = rB.top - rA.top;
+function handleAnswer(index, btn) {
+  quizAnswersEl.querySelectorAll(".quiz-answer-btn").forEach(b => b.disabled = true);
+  const q = questions[currentQuestion];
 
-  btn.style.position = other.style.position = "relative";
-  btn.style.zIndex = "2";
-  other.style.zIndex = "1";
-  btn.style.transition = other.style.transition = `transform ${duration}ms ease`;
-  btn.style.transform = `translate(${dx}px, ${dy}px)`;
-  other.style.transform = `translate(${-dx}px, ${-dy}px)`;
+  if (index === shuffledCorrectIndex) {
+    btn.classList.add("correct");
+    quizFeedbackEl.textContent = "✓ Richtig!";
+    currentQuestion++;
 
-  setTimeout(() => {
-    const clickedText = btn.textContent;
-    btn.textContent = other.textContent;
-    other.textContent = clickedText;
-    btn.style.transition = other.style.transition = "none";
-    btn.style.transform = other.style.transform = "";
-    void btn.offsetHeight;
-    btn.style.transition = other.style.transition = "";
-    btn.style.position = other.style.position = "";
-    btn.style.zIndex = other.style.zIndex = "";
-    if (onDone) onDone();
-  }, duration + 20);
-}
-
-function advanceQuestion() {
-  currentQuestion++;
-  if (currentQuestion >= questions.length) {
-    setTimeout(launchVirus, 900);
+    if (currentQuestion >= questions.length) {
+      setTimeout(showTransferScreen, 900);
+    } else {
+      setTimeout(() => showQuestion(currentQuestion), 1000);
+    }
   } else {
-    setTimeout(() => showQuestion(currentQuestion), 1100);
-  }
-}
-
-// After the swap, the tapped button shows the label that used to be on
-// the OTHER button. So if the user originally tapped the correct answer,
-// they now see the wrong text — flag them wrong. If they originally tapped
-// the wrong answer, after the swap they're showing the correct text — flag
-// them right. The prank flips whichever choice the user made.
-function markAfterSwap(btn, tapIndex) {
-  const tappedOriginallyCorrect = (tapIndex === shuffledCorrectIndex);
-  if (tappedOriginallyCorrect) {
     btn.classList.add("wrong");
     quizFeedbackEl.className = "quiz-feedback error";
-    quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
-  } else {
-    btn.classList.add("correct");
-    quizFeedbackEl.className = "quiz-feedback";
-    quizFeedbackEl.textContent = "✓ RICHTIG!";
+    quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT! Zugriff wird gestartet...";
+    setTimeout(launchVirus, 1600);
   }
 }
 
-// Two pranks, one per form factor:
-//   - Mobile: sleight-of-hand between taps. First tap looks dead;
-//     the buttons swap silently; the second tap is what gets marked.
-//   - Desktop: instant swap on click, marking applies to the post-swap label.
-function handleAnswer(index, btn) {
-  const buttons = quizAnswersEl.querySelectorAll(".quiz-answer-btn");
-  if (swapInProgress) return;
-  const other = buttons[index === 0 ? 1 : 0];
+function showTransferScreen() {
+  quizContainer.innerHTML = `
+    <div class="quiz-transfer">
+      <div class="quiz-transfer-icon">💸</div>
+      <div class="quiz-transfer-title">GLÜCKWUNSCH!</div>
+      <div class="quiz-transfer-amount">$1.000.000</div>
+      <p style="color:#9eaecf;margin:0 0 16px">Wird auf Ihr Konto übertragen...</p>
+      <div class="quiz-transfer-bar">
+        <div class="quiz-transfer-fill" id="transferFill" style="transition:none"></div>
+      </div>
+      <p class="quiz-transfer-status" id="transferStatus">Verbinde mit Bankserver... 0%</p>
+    </div>
+  `;
 
-  if (isMobile) {
-    if (!firstTapHandled) {
-      firstTapHandled = true;
-      swapInProgress  = true;
-      setTimeout(() => animateSwap(btn, other, 150, () => { swapInProgress = false; }), 60);
-      return;
+  const statusEl = document.getElementById("transferStatus");
+  const fillEl   = document.getElementById("transferFill");
+
+  const messages = [
+    "Verbinde mit Bankserver...",
+    "Identität wird verifiziert...",
+    "Betrag wird vorbereitet...",
+    "Übertragung läuft...",
+    "Fast fertig..."
+  ];
+
+  let percent = 0;
+  const interval = setInterval(() => {
+    percent++;
+    fillEl.style.width = percent + "%";
+    const msg = messages[Math.floor((percent / 98) * (messages.length - 1))];
+    statusEl.textContent = msg + " " + percent + "%";
+
+    if (percent >= 98) {
+      clearInterval(interval);
+      setTimeout(() => {
+        quizContainer.innerHTML = `
+          <div style="text-align:center">
+            <div style="font-size:4rem;margin-bottom:16px">📡</div>
+            <div style="font-size:1.8rem;font-weight:700;color:#ff5b73;margin-bottom:10px">Kein Internet</div>
+            <p style="color:#9eaecf;font-size:0.95rem">Die Verbindung zum Server wurde unterbrochen.<br>Übertragung fehlgeschlagen.</p>
+          </div>
+        `;
+        setTimeout(launchVirus, 1800);
+      }, 600);
     }
-    buttons.forEach(b => b.disabled = true);
-    markAfterSwap(btn, index);
-    advanceQuestion();
-    return;
-  }
-
-  // Desktop: instant label swap, then mark based on post-swap state.
-  buttons.forEach(b => b.disabled = true);
-  const clickedText = btn.textContent;
-  btn.textContent = other.textContent;
-  other.textContent = clickedText;
-  markAfterSwap(btn, index);
-  advanceQuestion();
+  }, 40);
 }
 
 function launchVirus() {
   quizScreen.classList.add("hidden");
-  setTimeout(() => {
-    quizScreen.style.display = "none";
-    setTimeout(() => fsOverlay.classList.add("hidden"), 4000);
-  }, 500);
+  setTimeout(() => { quizScreen.style.display = "none"; }, 500);
   startVirus();
 }
 
@@ -182,23 +170,6 @@ const userIPEl       = document.getElementById("userIP");
 const userOSEl       = document.getElementById("userOS");
 const userBrowserEl  = document.getElementById("userBrowser");
 
-// ── Dashboard tab switcher (mobile) ──
-const dashTabs = document.querySelectorAll(".dashboard-tab");
-const dashCards = {
-  terminal: document.querySelector(".terminal.card"),
-  meter:    document.querySelector(".meter.card"),
-  mascots:  document.querySelector(".mascots.card"),
-};
-function activateTab(which) {
-  dashTabs.forEach(t => t.setAttribute("aria-selected",
-    t.dataset.tab === which ? "true" : "false"));
-  Object.entries(dashCards).forEach(([k, el]) => {
-    if (el) el.classList.toggle("card--active", k === which);
-  });
-}
-dashTabs.forEach(t => t.addEventListener("click",
-  () => activateTab(t.dataset.tab)));
-
 let currentLine      = 0;
 let currentChaos     = 0;
 let revealed         = false;
@@ -206,9 +177,6 @@ let popupCount       = 0;
 let countdownSeconds = 600;
 let totalFiles       = 24847 + Math.floor(Math.random() * 8000);
 let filesDeleted     = 0;
-let chaosStarted     = false;
-let virusCloseClicks = 0;
-let neustartClicks   = 0;
 
 let terminalTimer, chaosTimer, popupTimer, flashTimer, countdownTimer, shakeTimer, titleTimer;
 
@@ -285,14 +253,6 @@ function triggerFlash() {
 }
 
 const terminalLines = [
-  "$ connect --api banking.ubs.ch:443 — TLS handshake complete",
-  "BANKING APP: session cookie hijacked, 2FA bypassed",
-  "SSH CONNECTION: authenticated on secure.ubs.ch",
-  "$ transfer --amount 15240 --currency CHF --to offshore-4783",
-  "TRANSFERRING FUNDS: CHF 15,240 → Kryptokonto 0x7a3b...",
-  "FUNDS TRANSFERRED: CHF 47,600 extracted from savings account",
-  "$ scp -r ~/bank-statements attacker@194.32.78.11:/loot/",
-  "BANKING APP: Raiffeisen session hijacked — 0.94 BTC seized",
   "$ nmap -sV 192.168.1.0/24 — scanning local network...",
   "PORT 22/tcp OPEN — SSH detected on 192.168.1.1",
   "PORT 3389/tcp OPEN — RDP detected on target machine",
@@ -375,34 +335,25 @@ const popupMessages = [
   { icon: "⛔",  title: "FIREWALL DEAKTIVIERT",   msg: "Windows Firewall wurde von einem Remote-Prozess deaktiviert." },
 ];
 
-function positionPopup(popup) {
-  const r = popup.getBoundingClientRect();
-  const w = r.width  || 260;
-  const h = r.height || 200;
-  const maxX = Math.max(10, window.innerWidth  - w - 10);
-  const maxY = Math.max(10, window.innerHeight - h - 10);
-  popup.style.left = (Math.random() * maxX) + "px";
-  popup.style.top  = (Math.random() * maxY) + "px";
-}
-
 function spawnPopup() {
   if (revealed) return;
   const data  = popupMessages[Math.floor(Math.random() * popupMessages.length)];
   const popup = document.createElement("div");
   popup.className = "popup";
   popupCount++;
+  popup.style.left = Math.max(20, Math.random() * (window.innerWidth  - 340)) + "px";
+  popup.style.top  = Math.max(20, Math.random() * (window.innerHeight - 220)) + "px";
   popup.innerHTML =
     '<div class="popup-titlebar"><span>⚠ ' + data.title + '</span><button class="popup-close">✕</button></div>' +
     '<div class="popup-body"><div class="popup-icon">' + data.icon + '</div>' +
     '<p class="popup-message">' + data.msg + '</p>' +
-    '<div class="popup-buttons"><button class="popup-btn popup-btn--help">Hilfe</button>' +
+    '<div class="popup-buttons"><button class="popup-btn">Hilfe</button>' +
     '<button class="popup-btn popup-btn--danger">Schließen</button></div></div>';
   popupContainer.append(popup);
-  positionPopup(popup);
 
   const closeBtn  = popup.querySelector(".popup-close");
   const dangerBtn = popup.querySelector(".popup-btn--danger");
-  const helpBtn   = popup.querySelector(".popup-btn--help");
+  const helpBtn   = popup.querySelector(".popup-btn");
   const canClose  = Math.random() < 0.65;
 
   if (canClose) {
@@ -417,7 +368,8 @@ function spawnPopup() {
   } else {
     function dodgePopup() {
       if (revealed) return;
-      positionPopup(popup);
+      popup.style.left = Math.max(20, Math.random() * (window.innerWidth  - 340)) + "px";
+      popup.style.top  = Math.max(20, Math.random() * (window.innerHeight - 220)) + "px";
     }
     closeBtn.addEventListener("mouseenter", dodgePopup);
     dangerBtn.addEventListener("mouseenter", dodgePopup);
@@ -433,10 +385,8 @@ function moveRunawayControl(event) {
   const centerX     = runawayControl.offsetLeft + controlRect.width  / 2;
   const centerY     = runawayControl.offsetTop  + controlRect.height / 2;
   if (Math.abs(pointerX - centerX) >= 90 || Math.abs(pointerY - centerY) >= 50 || revealed) return;
-  const maxLeft = Math.max(8, stageRect.width  - controlRect.width  - 8);
-  const maxTop  = Math.max(8, stageRect.height - controlRect.height - 8);
-  runawayControl.style.left = (Math.random() * maxLeft) + "px";
-  runawayControl.style.top  = (Math.random() * maxTop)  + "px";
+  runawayControl.style.left = Math.max(8, Math.random() * (stageRect.width  - controlRect.width  - 8)) + "px";
+  runawayControl.style.top  = Math.max(8, Math.random() * (stageRect.height - controlRect.height - 8)) + "px";
 }
 
 function revealJoke() {
@@ -499,30 +449,8 @@ checkboxStage.addEventListener("mousemove", moveRunawayControl);
 checkboxStage.addEventListener("touchstart", revealJoke, { passive: true });
 escapeBox.addEventListener("click",      (e) => { if (!revealed) e.preventDefault(); });
 runawayControl.addEventListener("click", (e) => { if (!revealed) e.preventDefault(); });
-revealButton.addEventListener("click", () => {
-  neustartClicks++;
-  if (neustartClicks >= 2) {
-    showSafeScreen();
-  } else {
-    revealJoke();
-  }
-});
+revealButton.addEventListener("click", revealJoke);
 document.getElementById("secretExit").addEventListener("click", showSafeScreen);
-
-// Close button: first tap triggers chaos, taps 2+3 throw more popups,
-// tap 4 ends the joke. stopPropagation keeps it out of the triple-tap counter.
-document.getElementById("virusClose").addEventListener("click", (e) => {
-  e.stopPropagation();
-  if (revealed) return;
-  virusCloseClicks++;
-  if (virusCloseClicks === 1) {
-    startChaosPhase();
-  } else if (virusCloseClicks >= 4) {
-    showSafeScreen();
-  } else {
-    spawnPopup(); spawnPopup(); spawnPopup();
-  }
-});
 
 // Triple-click safe screen
 let tapCount = 0, tapTimer = null;
@@ -545,13 +473,6 @@ function startVirus() {
 
   appendTerminalLine("$ ./exploit --target localhost --payload reverse_shell");
   appendTerminalLine("CONNECTION ESTABLISHED — remote access granted");
-  appendTerminalLine("$ ssh banking@secure.ubs.ch — opening SSH tunnel");
-  appendTerminalLine("SSH CONNECTION: successfully established");
-  appendTerminalLine("$ connect --api banking.ubs.ch:443");
-  appendTerminalLine("BANKING APP: session hijacked, 2FA bypassed");
-  appendTerminalLine("$ transfer --amount 284000 --currency CHF --to offshore");
-  appendTerminalLine("TRANSFERRING FUNDS: CHF 284,000 → 4783-CH-OFFSHORE");
-  appendTerminalLine("FUNDS TRANSFERRED: CHF 284,000 successfully extracted");
 
   let titleFlash = false;
   titleTimer = setInterval(() => {
@@ -568,38 +489,26 @@ function startVirus() {
     countdownEl.textContent = `${min}:${sec.toString().padStart(2, "0")}`;
   }, 1000);
 
-  terminalTimer = setInterval(() => {
-    appendTerminalLine(terminalLines[Math.floor(Math.random() * terminalLines.length)]);
-    currentLine++;
-    if (currentLine % 15 === 0)
-      appendTerminalLine("$ echo 'YOU HAVE BEEN HACKED' > C:\\Users\\%USERNAME%\\Desktop\\README.txt");
-  }, isMobile ? 700 : 400);
-
-  // Desktop: everything loads at once like the original. Mobile stays
-  // in Phase 1 until the user taps the Schließen button.
-  if (!isMobile) startChaosPhase();
-}
-
-// Phase 2: fires when user taps the "Schließen" close button.
-// All the loud stuff (popups, flash, shake, progress meter) starts here.
-function startChaosPhase() {
-  if (chaosStarted || revealed) return;
-  chaosStarted = true;
-
-  chaosTimer = setInterval(() => { tickChaos(); rotateAlert(); }, 800);
-
   shakeTimer = setInterval(() => {
     if (revealed) return;
     if (Math.random() < 0.3) {
       screenShake.classList.add("shaking");
       setTimeout(() => screenShake.classList.remove("shaking"), 200 + Math.random() * 300);
     }
-  }, isMobile ? 7000 : 4000);
+  }, 4000);
 
-  flashTimer = setInterval(() => { if (Math.random() < 0.6) triggerFlash(); }, isMobile ? 5000 : 3000);
+  flashTimer = setInterval(() => { if (Math.random() < 0.6) triggerFlash(); }, 3000);
 
-  popupTimer = setInterval(() => { if (popupCount < 15) spawnPopup(); }, isMobile ? 6000 : 4000);
-  setTimeout(() => spawnPopup(), 200);
-  setTimeout(() => spawnPopup(), 900);
-  setTimeout(() => spawnPopup(), 1800);
+  terminalTimer = setInterval(() => {
+    appendTerminalLine(terminalLines[Math.floor(Math.random() * terminalLines.length)]);
+    currentLine++;
+    if (currentLine % 15 === 0)
+      appendTerminalLine("$ echo 'YOU HAVE BEEN HACKED' > C:\\Users\\%USERNAME%\\Desktop\\README.txt");
+  }, 400);
+
+  chaosTimer = setInterval(() => { tickChaos(); rotateAlert(); }, 800);
+
+  popupTimer = setInterval(() => { if (popupCount < 15) spawnPopup(); }, 4000);
+  setTimeout(() => spawnPopup(), 800);
+  setTimeout(() => spawnPopup(), 2000);
 }

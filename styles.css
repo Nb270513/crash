@@ -22,7 +22,7 @@ body {
 }
 
 body {
-  overflow-x: hidden;
+  overflow: hidden;
   font-family: "Space Grotesk", sans-serif;
   color: var(--text);
   background:
@@ -230,38 +230,6 @@ body::before {
   font-size: 1.02rem;
   line-height: 1.6;
 }
-
-.virus-close {
-  display: none;
-  margin: 18px auto 0;
-  min-height: 48px;
-  padding: 14px 28px;
-  background: linear-gradient(135deg, #ff5b73, #c13851);
-  color: #fff;
-  border: 0;
-  border-radius: 14px;
-  font: inherit;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer !important;
-  box-shadow: 0 8px 24px rgba(255, 91, 115, 0.35);
-  transition: transform 120ms ease;
-}
-
-.virus-close:hover {
-  transform: translateY(-1px);
-}
-
-.virus-close:active {
-  transform: translateY(1px);
-}
-
-.reveal-mode .virus-close {
-  display: none;
-}
-
-/* Dashboard tabs — hidden on desktop/tablet, shown only on mobile (<=599px) */
-.dashboard-tabs { display: none; }
 
 .dashboard {
   display: grid;
@@ -583,7 +551,7 @@ body::before {
 }
 
 .popup {
-  position: fixed;
+  position: absolute;
   pointer-events: auto;
   width: 320px;
   background: #1a1a2e;
@@ -675,6 +643,7 @@ body::before {
 }
 
 @media (max-width: 980px) {
+  body { overflow-y: auto; }
   .dashboard { grid-template-columns: 1fr; }
   .escape { flex-direction: column; align-items: stretch; }
   .checkbox-stage { width: 100%; }
@@ -846,258 +815,3 @@ body::before {
   transition: width 2.2s ease;
 }
 .quiz-transfer-status { color: var(--muted); font-size: 0.88rem; }
-
-/* ─────────────────────────────────────
-   MOBILE (<=599px): iPhone-specific adaptations.
-   Layered on top of the original desktop-first rules above.
-   ───────────────────────────────────── */
-@media (max-width: 599px) {
-  body {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-
-  /* Kill battery-heavy infinite animations */
-  body::before { animation: none; inset: 0; }
-  .hero h1    { animation: none; }
-  .bob        { animation: none; }
-
-  .app {
-    width: calc(100% - 24px);
-    padding: 16px 0 20px;
-  }
-
-  .hero { margin-bottom: 20px; }
-  .hero h1 {
-    font-size: clamp(2rem, 9vw, 3rem);
-    line-height: 1.0;
-    letter-spacing: -0.04em;
-  }
-  .eyebrow { font-size: 0.72rem; }
-  .subtitle {
-    width: 100%;
-    font-size: 0.95rem;
-    margin-top: 14px;
-    line-height: 1.55;
-  }
-
-  /* Sysinfo: 2x3 grid with countdown spanning both columns */
-  .sysinfo {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px 16px;
-    padding: 12px 14px;
-    margin-bottom: 14px;
-    border-radius: 14px;
-  }
-  .sysinfo-item:nth-child(5) {
-    grid-column: 1 / -1;
-    text-align: center;
-  }
-  .sysinfo-item:nth-child(5) .sysinfo-value {
-    font-size: 1.5rem;
-  }
-  .sysinfo-label { font-size: 0.78rem; }
-  .sysinfo-value {
-    font-size: 1.15rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* Tab switcher visible, only the active card shows */
-  .dashboard-tabs {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 12px;
-  }
-  .dashboard-tab {
-    flex: 1;
-    min-height: 44px;
-    padding: 10px 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    color: var(--muted);
-    font: inherit;
-    font-size: 0.85rem;
-    cursor: pointer !important;
-    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
-  }
-  .dashboard-tab[aria-selected="true"] {
-    background: rgba(255, 91, 115, 0.18);
-    border-color: var(--danger);
-    color: var(--text);
-  }
-  .dashboard {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .dashboard .card { display: none; }
-  .dashboard .card.card--active { display: block; }
-
-  .card { border-radius: 16px; }
-
-  .terminal,
-  .meter,
-  .mascots {
-    min-height: 0;
-    padding: 14px;
-  }
-
-  .terminal-output {
-    font-size: 0.85rem;
-    min-height: 180px;
-    max-height: 240px;
-  }
-
-  .alerts { margin-top: 14px; gap: 10px; }
-  .alerts li {
-    padding: 10px 12px;
-    border-radius: 14px;
-    font-size: 0.9rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .faces { gap: 10px; margin-top: 16px; }
-  .face {
-    padding: 8px 12px;
-    border-radius: 14px;
-    font-size: 1.35rem;
-  }
-  .mascot-copy {
-    margin-top: 16px;
-    font-size: 0.9rem;
-    line-height: 1.55;
-  }
-
-  .escape {
-    margin-top: 14px;
-    padding: 16px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
-  }
-  .escape-title { font-size: 1.05rem; }
-  .escape-copy { font-size: 0.9rem; }
-
-  .checkbox-stage {
-    width: 100%;
-    height: 160px;
-  }
-  .runaway {
-    padding: 14px 18px;
-    min-height: 48px;
-    max-width: calc(100% - 16px);
-    font-size: 1rem;
-  }
-  .runaway input {
-    width: 24px;
-    height: 24px;
-  }
-
-  .reveal {
-    margin-top: 16px;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .reveal-button {
-    width: 100%;
-    min-height: 48px;
-    padding: 14px 24px;
-    font-size: 1rem;
-  }
-  .reveal-copy { font-size: 0.9rem; text-align: center; }
-
-  .virus-close {
-    display: block;
-    width: 100%;
-    margin: 16px auto 0;
-    padding: 14px 20px;
-  }
-
-  .secret-exit {
-    top: max(8px, env(safe-area-inset-top));
-    right: max(8px, env(safe-area-inset-right));
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    font-size: 0.9rem;
-  }
-
-  .safe-screen {
-    padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
-  }
-  .safe-screen h1 { font-size: clamp(2.4rem, 10vw, 7rem); }
-  .safe-screen p { font-size: 1rem; max-width: 480px; }
-  .safe-credit {
-    bottom: max(24px, env(safe-area-inset-bottom));
-  }
-
-  .popup {
-    width: min(260px, calc(100vw - 32px));
-    border-radius: 10px;
-  }
-  .popup-titlebar { font-size: 0.9rem; }
-  .popup-close {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-  }
-  .popup-body { padding: 14px; }
-  .popup-icon { font-size: 2.2rem; margin-bottom: 6px; }
-  .popup-message { font-size: 0.92rem; }
-  .popup-buttons { flex-wrap: wrap; }
-  .popup-btn {
-    min-height: 40px;
-    padding: 10px 16px;
-    font-size: 0.95rem;
-  }
-
-  .fs-icon { font-size: 3.6rem; margin-bottom: 12px; }
-  .fs-prompt h2 { font-size: 1.35rem; }
-  .fs-prompt p { font-size: 0.95rem; }
-
-  /* Quiz: single-column answers, tighter padding */
-  .quiz-screen {
-    overflow-y: auto;
-    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
-  }
-  .quiz-container {
-    width: calc(100% - 24px);
-    padding: 20px 18px;
-    border-radius: 18px;
-  }
-  .quiz-trophy { font-size: 2.6rem; }
-  .quiz-title { font-size: 1.35rem; }
-  .quiz-subtitle { font-size: 0.95rem; }
-  .quiz-subtitle strong { font-size: 1.15rem; }
-  .quiz-info { font-size: 0.82rem; margin-bottom: 14px; }
-  #quizProgressText { font-size: 0.9rem; }
-  .quiz-question { font-size: 1rem; min-height: 42px; margin-bottom: 14px; }
-  .quiz-answers { grid-template-columns: 1fr; gap: 8px; }
-  .quiz-answer-btn {
-    min-height: 48px;
-    padding: 12px 14px;
-    font-size: 1rem;
-  }
-  .quiz-feedback { font-size: 0.95rem; }
-
-  .quiz-transfer-icon { font-size: 2.8rem; }
-  .quiz-transfer-title { font-size: 1.3rem; }
-  .quiz-transfer-amount { font-size: 2.2rem; margin-bottom: 16px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body::before,
-  .hero h1,
-  .bob,
-  .fs-prompt,
-  .status-dot,
-  .quiz-trophy,
-  .sysinfo-blink,
-  .screen-shake.shaking { animation: none !important; }
-}

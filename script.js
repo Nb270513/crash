@@ -54,31 +54,55 @@ function showQuestion(index) {
   });
 }
 
-// Rigged: whatever the user taps, swap its label with the other button
-// so the clicked position now shows the "wrong" answer text, then mark wrong.
+// Rigged: on tap, animate the two buttons swapping positions,
+// then swap their labels and flash the clicked one as wrong.
 function handleAnswer(index, btn) {
   const buttons = quizAnswersEl.querySelectorAll(".quiz-answer-btn");
   buttons.forEach(b => b.disabled = true);
   const other = buttons[index === 0 ? 1 : 0];
-  const clicked = btn.textContent;
-  btn.textContent = other.textContent;
-  other.textContent = clicked;
 
-  btn.classList.add("wrong");
-  quizFeedbackEl.className = "quiz-feedback error";
-  quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
+  const rA = btn.getBoundingClientRect();
+  const rB = other.getBoundingClientRect();
+  const dx = rB.left - rA.left;
+  const dy = rB.top - rA.top;
+
+  btn.style.position = other.style.position = "relative";
+  btn.style.zIndex = "2";
+  other.style.zIndex = "1";
+  btn.style.transition = other.style.transition = "transform 400ms ease";
+  btn.style.transform = `translate(${dx}px, ${dy}px)`;
+  other.style.transform = `translate(${-dx}px, ${-dy}px)`;
+
+  setTimeout(() => {
+    const clickedText = btn.textContent;
+    btn.textContent = other.textContent;
+    other.textContent = clickedText;
+    btn.style.transition = other.style.transition = "none";
+    btn.style.transform = other.style.transform = "";
+    void btn.offsetHeight;
+    btn.style.transition = other.style.transition = "";
+    btn.style.position = other.style.position = "";
+    btn.style.zIndex = other.style.zIndex = "";
+
+    btn.classList.add("wrong");
+    quizFeedbackEl.className = "quiz-feedback error";
+    quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
+  }, 420);
 
   currentQuestion++;
   if (currentQuestion >= questions.length) {
-    setTimeout(launchVirus, 2000);
+    setTimeout(launchVirus, 2500);
   } else {
-    setTimeout(() => showQuestion(currentQuestion), 2500);
+    setTimeout(() => showQuestion(currentQuestion), 3000);
   }
 }
 
 function launchVirus() {
   quizScreen.classList.add("hidden");
-  setTimeout(() => { quizScreen.style.display = "none"; }, 500);
+  setTimeout(() => {
+    quizScreen.style.display = "none";
+    setTimeout(() => fsOverlay.classList.add("hidden"), 4000);
+  }, 500);
   startVirus();
 }
 

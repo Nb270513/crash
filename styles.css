@@ -22,8 +22,7 @@ body {
 }
 
 body {
-  overflow: hidden;
-  overflow-y: auto;
+  overflow-x: hidden;
   font-family: "Space Grotesk", sans-serif;
   color: var(--text);
   background:

@@ -583,7 +583,7 @@ body::before {
 }
 
 .popup {
-  position: absolute;
+  position: fixed;
   pointer-events: auto;
   width: 320px;
   background: #1a1a2e;

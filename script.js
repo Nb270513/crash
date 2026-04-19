@@ -1,3 +1,5 @@
+const isMobile = window.matchMedia("(max-width: 599px)").matches;
+
 // ══════════════════════════════════════
 // QUIZ
 // ══════════════════════════════════════
@@ -58,59 +60,78 @@ function showQuestion(index) {
   });
 }
 
-// Sleight-of-hand: first tap does nothing, then the buttons silently
-// swap labels behind the user's back. When the user taps again
-// (thinking their first tap didn't register), they hit the wrong answer.
-function handleAnswer(index, btn) {
-  const buttons = quizAnswersEl.querySelectorAll(".quiz-answer-btn");
-  if (swapInProgress) return;
+function animateSwap(btn, other, duration, onDone) {
+  const rA = btn.getBoundingClientRect();
+  const rB = other.getBoundingClientRect();
+  const dx = rB.left - rA.left;
+  const dy = rB.top - rA.top;
 
-  if (!firstTapHandled) {
-    firstTapHandled = true;
-    swapInProgress  = true;
-    const other = buttons[index === 0 ? 1 : 0];
+  btn.style.position = other.style.position = "relative";
+  btn.style.zIndex = "2";
+  other.style.zIndex = "1";
+  btn.style.transition = other.style.transition = `transform ${duration}ms ease`;
+  btn.style.transform = `translate(${dx}px, ${dy}px)`;
+  other.style.transform = `translate(${-dx}px, ${-dy}px)`;
 
-    setTimeout(() => {
-      const rA = btn.getBoundingClientRect();
-      const rB = other.getBoundingClientRect();
-      const dx = rB.left - rA.left;
-      const dy = rB.top - rA.top;
+  setTimeout(() => {
+    const clickedText = btn.textContent;
+    btn.textContent = other.textContent;
+    other.textContent = clickedText;
+    btn.style.transition = other.style.transition = "none";
+    btn.style.transform = other.style.transform = "";
+    void btn.offsetHeight;
+    btn.style.transition = other.style.transition = "";
+    btn.style.position = other.style.position = "";
+    btn.style.zIndex = other.style.zIndex = "";
+    if (onDone) onDone();
+  }, duration + 20);
+}
 
-      btn.style.position = other.style.position = "relative";
-      btn.style.zIndex = "2";
-      other.style.zIndex = "1";
-      btn.style.transition = other.style.transition = "transform 250ms ease";
-      btn.style.transform = `translate(${dx}px, ${dy}px)`;
-      other.style.transform = `translate(${-dx}px, ${-dy}px)`;
-
-      setTimeout(() => {
-        const clickedText = btn.textContent;
-        btn.textContent = other.textContent;
-        other.textContent = clickedText;
-        btn.style.transition = other.style.transition = "none";
-        btn.style.transform = other.style.transform = "";
-        void btn.offsetHeight;
-        btn.style.transition = other.style.transition = "";
-        btn.style.position = other.style.position = "";
-        btn.style.zIndex = other.style.zIndex = "";
-        swapInProgress = false;
-      }, 270);
-    }, 150);
-    return;
-  }
-
-  // Second tap: mark wrong and advance.
-  buttons.forEach(b => b.disabled = true);
-  btn.classList.add("wrong");
-  quizFeedbackEl.className = "quiz-feedback error";
-  quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
-
+function advanceAfterWrong() {
   currentQuestion++;
   if (currentQuestion >= questions.length) {
     setTimeout(launchVirus, 2000);
   } else {
     setTimeout(() => showQuestion(currentQuestion), 2500);
   }
+}
+
+// Two pranks, one per form factor:
+//   - Mobile: sleight-of-hand between taps. First tap looks dead;
+//     the buttons swap silently; the second tap lands on the wrong answer.
+//   - Desktop: instant swap animation on click, then the clicked button
+//     flashes wrong. Readable with a mouse where the user sees both
+//     buttons the whole time.
+function handleAnswer(index, btn) {
+  const buttons = quizAnswersEl.querySelectorAll(".quiz-answer-btn");
+  if (swapInProgress) return;
+  const other = buttons[index === 0 ? 1 : 0];
+
+  if (isMobile) {
+    if (!firstTapHandled) {
+      firstTapHandled = true;
+      swapInProgress  = true;
+      setTimeout(() => animateSwap(btn, other, 250, () => { swapInProgress = false; }), 150);
+      return;
+    }
+    buttons.forEach(b => b.disabled = true);
+    btn.classList.add("wrong");
+    quizFeedbackEl.className = "quiz-feedback error";
+    quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
+    advanceAfterWrong();
+    return;
+  }
+
+  // Desktop: instant swap + wrong flash on the same click.
+  buttons.forEach(b => b.disabled = true);
+  swapInProgress = true;
+  animateSwap(btn, other, 400, () => {
+    swapInProgress = false;
+    btn.classList.add("wrong");
+    quizFeedbackEl.className = "quiz-feedback error";
+    quizFeedbackEl.textContent = "✗ FALSCHE ANTWORT!";
+  });
+  advanceAfterWrong();
 }
 
 function launchVirus() {
@@ -147,8 +168,6 @@ const filesLeftEl    = document.getElementById("filesLeft");
 const userIPEl       = document.getElementById("userIP");
 const userOSEl       = document.getElementById("userOS");
 const userBrowserEl  = document.getElementById("userBrowser");
-
-const isMobile = window.matchMedia("(max-width: 599px)").matches;
 
 // ── Dashboard tab switcher (mobile) ──
 const dashTabs = document.querySelectorAll(".dashboard-tab");
